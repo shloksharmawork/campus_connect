@@ -1,5 +1,4 @@
-'use client';
-
+import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import { Settings, User, Bell, Palette, Lock, LogOut } from 'lucide-react';
