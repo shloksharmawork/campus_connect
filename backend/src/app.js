@@ -10,21 +10,8 @@ const postRoutes = require('./routes/postRoutes');
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'https://campus-connect-tawny-alpha.vercel.app',
-  'http://localhost:3000'
-].filter(Boolean);
-
 app.use(cors({
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.some(o => origin.startsWith(o))) {
-      return callback(null, true);
-    }
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true,
   credentials: true,
 }));
 app.use(express.json());
