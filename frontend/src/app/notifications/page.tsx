@@ -3,7 +3,7 @@
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
-import { Bell, ShieldCheck, Mail, Info } from 'lucide-react';
+import { Bell, ShieldCheck, Info } from 'lucide-react';
 
 export default function NotificationsPage() {
   return (

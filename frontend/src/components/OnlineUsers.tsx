@@ -27,10 +27,9 @@ export default function OnlineUsers() {
         
         // Extract friend IDs
         const ids = new Set<string>();
-        friendsRes.data.forEach((conn: { requesterId: any, receiverId: any }) => {
-          // If requester is not me, requester is friend. Otherwise receiver is friend.
-          ids.add(conn.requesterId._id || conn.requesterId);
-          ids.add(conn.receiverId._id || conn.receiverId);
+        friendsRes.data.forEach((conn: { requesterId: { _id: string }, receiverId: { _id: string } }) => {
+          ids.add(conn.requesterId._id);
+          ids.add(conn.receiverId._id);
         });
         setFriendIds(ids);
       } catch (err) {
@@ -67,9 +66,10 @@ export default function OnlineUsers() {
     try {
       await api.post('/connections/request', { receiverId });
       alert('Connection request sent!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to send request');
+      const message = (err as any).response?.data?.message || 'Failed to send request';
+      alert(message);
     }
   };
 
