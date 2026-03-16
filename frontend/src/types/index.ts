@@ -1,0 +1,25 @@
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  profileImage: string;
+  role: string;
+  onlineStatus?: boolean;
+}
+
+export interface Post {
+  _id: string;
+  userId: User;
+  type: 'text' | 'voice';
+  content?: string;
+  audioUrl?: string;
+  createdAt: string;
+}
+
+export interface Connection {
+  _id: string;
+  requesterId: User;
+  receiverId: User;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}
