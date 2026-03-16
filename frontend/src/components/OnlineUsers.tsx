@@ -4,19 +4,36 @@ import { useState, useEffect } from 'react';
 import { useSocketStore } from '@/services/socketService';
 import api from '@/services/api';
 import { User } from '@/types';
-import { UserPlus, Search } from 'lucide-react';
+import { UserPlus, Search, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
+import ChatWindow from './ChatWindow';
 
 export default function OnlineUsers() {
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [friendIds, setFriendIds] = useState<Set<string>>(new Set());
+  const [activeChat, setActiveChat] = useState<User | null>(null);
   const { socket } = useSocketStore();
 
   useEffect(() => {
     const fetchOnlineUsers = async () => {
       try {
-        const { data } = await api.get('/users/online');
-        setOnlineUsers(data);
+        const [onlineRes, friendsRes] = await Promise.all([
+          api.get('/users/online'),
+          api.get('/connections?status=accepted')
+        ]);
+        
+        setOnlineUsers(onlineRes.data);
+        
+        // Extract friend IDs
+        const ids = new Set<string>();
+        friendsRes.data.forEach((conn: any) => {
+          // If requester is not me, requester is friend. Otherwise receiver is friend.
+          // Wait, we need to know who "me" is. But let's just use both IDs.
+          ids.add(conn.requesterId._id || conn.requesterId);
+          ids.add(conn.receiverId._id || conn.receiverId);
+        });
+        setFriendIds(ids);
       } catch (err) {
         console.error('Failed to fetch online users', err);
       } finally {
@@ -108,20 +125,40 @@ export default function OnlineUsers() {
                 <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">{user.name}</p>
                 <p className="text-xs text-muted-foreground truncate">Student</p>
               </div>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSendRequest(user._id);
-                }}
-                className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all" 
-                title="Send Request"
-              >
-                <UserPlus className="h-4 w-4" />
-              </button>
+              {friendIds.has(user._id) ? (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveChat(user);
+                  }}
+                  className="p-2 text-accent hover:bg-accent/10 rounded-lg transition-all" 
+                  title="Send Message"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                </button>
+              ) : (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSendRequest(user._id);
+                  }}
+                  className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all" 
+                  title="Send Request"
+                >
+                  <UserPlus className="h-4 w-4" />
+                </button>
+              )}
             </div>
           ))
         )}
       </div>
+
+      {activeChat && (
+        <ChatWindow 
+          friend={activeChat} 
+          onClose={() => setActiveChat(null)} 
+        />
+      )}
     </div>
   );
 }

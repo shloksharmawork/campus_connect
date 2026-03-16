@@ -42,6 +42,17 @@ const initSocket = (server) => {
       console.error(err);
     }
 
+    socket.on('privateMessage', ({ receiverId, content }) => {
+      const receiverSocketId = connectedUsers.get(receiverId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit('receiveMessage', {
+          senderId: socket.userId,
+          content,
+          createdAt: new Date()
+        });
+      }
+    });
+
     socket.on('disconnect', async () => {
       console.log(`User disconnected: ${socket.userId}`);
       connectedUsers.delete(socket.userId);
