@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { getMessages, sendMessage } = require('../controllers/chatController');
-const auth = require('../middlewares/auth');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-router.use(auth);
+router.use(authMiddleware);
 
 router.get('/:friendId', getMessages);
 router.post('/', sendMessage);
