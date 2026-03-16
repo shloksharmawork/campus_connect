@@ -55,7 +55,7 @@ export default function PostCard({ post, onDelete }: { post: Post, onDelete?: (i
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50"
+            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all disabled:opacity-50"
             title="Delete post"
           >
             {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}

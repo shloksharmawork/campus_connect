@@ -2,6 +2,7 @@
 
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
+import MobileNav from '@/components/MobileNav';
 import { Bell, ShieldCheck, Mail, Info } from 'lucide-react';
 
 export default function NotificationsPage() {
@@ -43,6 +44,7 @@ export default function NotificationsPage() {
           </div>
         </main>
       </div>
+      <MobileNav />
     </div>
   );
 }

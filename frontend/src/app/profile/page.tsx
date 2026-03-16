@@ -3,6 +3,7 @@
 import { useAuthStore } from '@/services/authService';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
+import MobileNav from '@/components/MobileNav';
 import { User, Mail, GraduationCap, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 
@@ -94,6 +95,7 @@ export default function ProfilePage() {
           </div>
         </main>
       </div>
+      <MobileNav />
     </div>
   );
 }

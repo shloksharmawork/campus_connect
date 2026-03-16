@@ -47,6 +47,16 @@ export default function OnlineUsers() {
     };
   }, [socket]);
 
+  const handleSendRequest = async (receiverId: string) => {
+    try {
+      await api.post('/connections/request', { receiverId });
+      alert('Connection request sent!');
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to send request');
+    }
+  };
+
   return (
     <div className="w-80 glass-panel border-l border-white/5 h-[calc(100vh-4rem)] p-6 hidden lg:flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -98,7 +108,14 @@ export default function OnlineUsers() {
                 <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">{user.name}</p>
                 <p className="text-xs text-muted-foreground truncate">Student</p>
               </div>
-              <button className="p-2 opacity-0 group-hover:opacity-100 text-primary hover:bg-primary/10 rounded-lg transition-all" title="Send Request">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSendRequest(user._id);
+                }}
+                className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-all" 
+                title="Send Request"
+              >
                 <UserPlus className="h-4 w-4" />
               </button>
             </div>

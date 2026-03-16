@@ -8,6 +8,7 @@ import Sidebar from '@/components/Sidebar';
 import Feed from '@/components/Feed';
 import OnlineUsers from '@/components/OnlineUsers';
 import ConnectionRequests from '@/components/ConnectionRequests';
+import MobileNav from '@/components/MobileNav';
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -42,6 +43,7 @@ export default function DashboardPage() {
 
         <OnlineUsers />
       </div>
+      <MobileNav />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import ConnectionRequests from '@/components/ConnectionRequests';
+import MobileNav from '@/components/MobileNav';
 import { Users } from 'lucide-react';
 
 export default function ConnectionsPage() {
@@ -56,6 +57,7 @@ export default function ConnectionsPage() {
           </div>
         </main>
       </div>
+      <MobileNav />
     </div>
   );
 }
