@@ -1,6 +1,8 @@
-const express = require('express');
-const cors = require('cors');
+const errorHandler = require('./middlewares/errorHandler');
 
+// Route imports
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const connectionRoutes = require('./routes/connectionRoutes');
 const postRoutes = require('./routes/postRoutes');
 
