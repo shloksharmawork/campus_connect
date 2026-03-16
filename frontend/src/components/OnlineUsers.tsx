@@ -19,17 +19,19 @@ export default function OnlineUsers() {
     const fetchOnlineUsers = async () => {
       try {
         const [onlineRes, friendsRes] = await Promise.all([
-          api.get('/users/online'),
-          api.get('/connections?status=accepted')
+          api.get<User[]>('/users/online'),
+          api.get<any[]>('/connections?status=accepted')
         ]);
         
         setOnlineUsers(onlineRes.data);
         
         // Extract friend IDs
         const ids = new Set<string>();
-        friendsRes.data.forEach((conn: { requesterId: { _id: string }, receiverId: { _id: string } }) => {
-          ids.add(conn.requesterId._id);
-          ids.add(conn.receiverId._id);
+        friendsRes.data.forEach((conn) => {
+          const rId = typeof conn.requesterId === 'object' ? conn.requesterId._id : conn.requesterId;
+          const vId = typeof conn.receiverId === 'object' ? conn.receiverId._id : conn.receiverId;
+          ids.add(rId);
+          ids.add(vId);
         });
         setFriendIds(ids);
       } catch (err) {
@@ -68,8 +70,11 @@ export default function OnlineUsers() {
       alert('Connection request sent!');
     } catch (err: unknown) {
       console.error(err);
-      const message = (err as any).response?.data?.message || 'Failed to send request';
-      alert(message);
+      let errorMsg = 'Failed to send request';
+      if (err && typeof err === 'object' && 'response' in err) {
+        errorMsg = (err as any).response?.data?.message || errorMsg;
+      }
+      alert(errorMsg);
     }
   };
 

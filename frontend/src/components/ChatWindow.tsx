@@ -97,7 +97,7 @@ export default function ChatWindow({ friend, onClose }: ChatWindowProps) {
             <p className="text-[10px] text-green-500 font-bold uppercase tracking-wider">Online</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-muted-foreground hover:text-foreground">
+        <button onClick={onClose} title="Close chat" className="p-2 hover:bg-white/10 rounded-full transition-colors text-muted-foreground hover:text-foreground">
           <X className="h-5 w-5" />
         </button>
       </div>
