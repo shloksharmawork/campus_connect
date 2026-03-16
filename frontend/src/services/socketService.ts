@@ -14,7 +14,10 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     const existingSocket = get().socket;
     if (existingSocket) return;
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', {
+    // Connect to base URL (not /api) for sockets
+    const socketUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace('/api', '');
+    
+    const newSocket = io(socketUrl, {
       auth: { token },
       transports: ['websocket'],
     });
