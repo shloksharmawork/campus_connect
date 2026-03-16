@@ -3,9 +3,8 @@
 import { 
   MessageSquare, 
   Users, 
-  Bell, 
   User as UserIcon,
-  Settings
+  Search
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,10 +12,9 @@ import { cn } from '@/utils/utils';
 
 const menuItems = [
   { icon: MessageSquare, label: 'Feed', href: '/dashboard' },
-  { icon: Users, label: 'Connections', href: '/connections' },
-  { icon: Bell, label: 'Notifications', href: '/notifications' },
+  { icon: Search, label: 'Explore', href: '/discover' },
+  { icon: Users, label: 'Connect', href: '/connections' },
   { icon: UserIcon, label: 'Profile', href: '/profile' },
-  { icon: Settings, label: 'Settings', href: '/settings' },
 ];
 
 export default function MobileNav() {

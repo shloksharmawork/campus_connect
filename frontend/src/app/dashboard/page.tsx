@@ -41,7 +41,7 @@ export default function DashboardPage() {
           </div>
         </main>
 
-        <OnlineUsers />
+        <OnlineUsers className="w-80 glass-panel border-l border-white/5 h-[calc(100vh-4rem)] p-6 hidden lg:flex flex-col gap-6" />
       </div>
       <MobileNav />
     </div>

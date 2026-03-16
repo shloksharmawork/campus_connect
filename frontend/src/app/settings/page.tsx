@@ -1,17 +1,35 @@
 'use client';
 
-import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import { Settings, User, Bell, Palette, Lock, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/services/authService';
+import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
   const { logout } = useAuthStore();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
 
   const settingsGroups = [
-    { title: 'Account', items: [{ icon: User, label: 'Edit Profile' }, { icon: Lock, label: 'Privacy' }] },
-    { title: 'Preferences', items: [{ icon: Bell, label: 'Notifications' }, { icon: Palette, label: 'Theme & Appearance' }] }
+    { 
+      title: 'Account', 
+      items: [
+        { icon: User, label: 'Edit Profile', href: '/profile' }, 
+        { icon: Lock, label: 'Privacy', href: '/settings' }
+      ] 
+    },
+    { 
+      title: 'Preferences', 
+      items: [
+        { icon: Bell, label: 'Notifications', href: '/notifications' }, 
+        { icon: Palette, label: 'Theme & Appearance', href: '/settings' }
+      ] 
+    }
   ];
 
   return (
@@ -40,6 +58,7 @@ export default function SettingsPage() {
                     {group.items.map((item, i) => (
                       <button 
                         key={item.label}
+                        onClick={() => router.push(item.href)}
                         className={`w-full flex items-center gap-4 px-6 py-4 hover:bg-white/5 transition-all text-left ${i !== group.items.length - 1 ? 'border-b border-white/5' : ''}`}
                       >
                         <item.icon className="h-5 w-5 text-muted-foreground" />
@@ -52,7 +71,7 @@ export default function SettingsPage() {
 
               <div className="pt-6">
                 <button 
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-3xl border border-destructive/20 transition-all font-bold"
                 >
                   <LogOut className="h-5 w-5" />

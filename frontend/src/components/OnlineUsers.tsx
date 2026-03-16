@@ -8,7 +8,7 @@ import { UserPlus, Search, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import ChatWindow from './ChatWindow';
 
-export default function OnlineUsers() {
+export default function OnlineUsers({ className }: { className?: string }) {
   const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set());
@@ -20,7 +20,7 @@ export default function OnlineUsers() {
       try {
         const [onlineRes, friendsRes] = await Promise.all([
           api.get<User[]>('/users/online'),
-          api.get<any[]>('/connections?status=accepted')
+          api.get<{ requesterId: { _id: string } | string, receiverId: { _id: string } | string }[]>('/connections?status=accepted')
         ]);
         
         setOnlineUsers(onlineRes.data);
@@ -79,7 +79,7 @@ export default function OnlineUsers() {
   };
 
   return (
-    <div className="w-80 glass-panel border-l border-white/5 h-[calc(100vh-4rem)] p-6 hidden lg:flex flex-col gap-6">
+    <div className={className}>
       <div className="flex items-center justify-between">
         <h2 className="font-bold text-lg flex items-center gap-2">
           Online Students
