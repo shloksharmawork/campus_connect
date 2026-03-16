@@ -1,3 +1,5 @@
+const express = require('express');
+const cors = require('cors');
 const errorHandler = require('./middlewares/errorHandler');
 
 // Route imports
@@ -21,7 +23,7 @@ app.use('/api/connections', connectionRoutes);
 app.use('/api/posts', postRoutes);
 
 // Health check
-app.get('/health', (req, res) => res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV }));
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok', environment: process.env.NODE_ENV || 'production' }));
 
 // Error middleware
 app.use(errorHandler);
