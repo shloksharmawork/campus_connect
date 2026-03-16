@@ -23,3 +23,11 @@ export interface Connection {
   status: 'pending' | 'accepted' | 'rejected';
   createdAt: string;
 }
+
+export interface Message {
+  _id: string;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  createdAt: string;
+}

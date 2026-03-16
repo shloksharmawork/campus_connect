@@ -27,9 +27,8 @@ export default function OnlineUsers() {
         
         // Extract friend IDs
         const ids = new Set<string>();
-        friendsRes.data.forEach((conn: any) => {
+        friendsRes.data.forEach((conn: { requesterId: any, receiverId: any }) => {
           // If requester is not me, requester is friend. Otherwise receiver is friend.
-          // Wait, we need to know who "me" is. But let's just use both IDs.
           ids.add(conn.requesterId._id || conn.requesterId);
           ids.add(conn.receiverId._id || conn.receiverId);
         });

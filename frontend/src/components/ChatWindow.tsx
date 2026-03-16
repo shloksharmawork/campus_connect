@@ -38,7 +38,7 @@ export default function ChatWindow({ friend, onClose }: ChatWindowProps) {
     fetchMessages();
 
     if (socket) {
-      socket.on('receiveMessage', (message: any) => {
+      socket.on('receiveMessage', (message: Message) => {
         if (message.senderId === friend._id) {
           setMessages((prev) => [...prev, message]);
         }
@@ -118,7 +118,7 @@ export default function ChatWindow({ friend, onClose }: ChatWindowProps) {
           </div>
         ) : (
           messages.map((msg, idx) => {
-            const isMe = msg.senderId === user?._id || (typeof msg.senderId === 'object' && msg.senderId._id === user?._id);
+            const isMe = msg.senderId === user?._id;
             return (
               <div 
                 key={idx} 
@@ -154,6 +154,7 @@ export default function ChatWindow({ friend, onClose }: ChatWindowProps) {
         />
         <button 
           type="submit"
+          title="Send message"
           disabled={!newMessage.trim()}
           className="p-2 bg-primary text-white rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
         >
