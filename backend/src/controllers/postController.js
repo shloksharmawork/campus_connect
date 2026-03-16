@@ -67,22 +67,12 @@ const getFeed = async (req, res, next) => {
   try {
     const userId = req.user.userId;
 
-    // Get all accepted connections
-    const connections = await Connection.find({
-      $or: [{ requesterId: userId }, { receiverId: userId }],
-      status: 'accepted',
-    });
-
-    // Create a list of user IDs to fetch posts from (friends + self)
-    const friendIds = connections.map(conn => 
-      conn.requesterId.toString() === userId ? conn.receiverId : conn.requesterId
-    );
-    friendIds.push(userId);
-
-    const posts = await Post.find({ userId: { $in: friendIds } })
+    // For Campus Connect, we'll show all posts in the feed so everyone can see each other
+    // and strangers can discover and connect.
+    const posts = await Post.find()
       .populate('userId', 'name profileImage')
       .sort({ createdAt: -1 })
-      .limit(50); // Optional pagination
+      .limit(100);
 
     res.status(200).json(posts);
   } catch (error) {
