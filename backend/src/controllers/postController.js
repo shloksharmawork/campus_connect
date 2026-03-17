@@ -1,6 +1,6 @@
 const Post = require('../models/Post');
 const Connection = require('../models/Connection');
-const { uploadToS3 } = require('../services/storageService');
+const { uploadToS3, getSignedAudioUrl } = require('../services/storageService');
 
 const createTextPost = async (req, res, next) => {
   try {
@@ -97,6 +97,9 @@ const reactToPost = async (req, res, next) => {
     const post = await Post.findById(id);
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
+    // Guard: older posts may not have the reactions array in MongoDB yet
+    if (!post.reactions) post.reactions = [];
+
     const existingReaction = post.reactions.find(
       (r) => r.userId.toString() === userId
     );
@@ -124,10 +127,30 @@ const reactToPost = async (req, res, next) => {
   }
 };
 
+// Refresh pre-signed audio URL for old posts with broken public URLs
+const refreshAudioUrl = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findById(id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+    if (!post.audioUrl) return res.status(400).json({ message: 'Post has no audio' });
+
+    const newSignedUrl = await getSignedAudioUrl(post.audioUrl);
+    post.audioUrl = newSignedUrl;
+    await post.save();
+    await post.populate('userId', 'name profileImage');
+    res.status(200).json(post);
+  } catch (error) {
+    console.error('❌ refreshAudioUrl error:', error.message);
+    next(error);
+  }
+};
+
 module.exports = {
   createTextPost,
   createVoicePost,
   getFeed,
   deletePost,
   reactToPost,
+  refreshAudioUrl,
 };

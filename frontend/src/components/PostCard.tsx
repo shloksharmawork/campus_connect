@@ -1,7 +1,7 @@
 'use client';
 
 import { Post, Reaction } from '@/types';
-import { Mic, FileText, Trash2, Loader2 } from 'lucide-react';
+import { Mic, FileText, Trash2, Loader2, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuthStore } from '@/services/authService';
 import { useState } from 'react';
@@ -27,6 +27,8 @@ export default function PostCard({ post, onDelete, onUpdate }: {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [localReactions, setLocalReactions] = useState<Reaction[]>(post.reactions || []);
+  const [audioUrl, setAudioUrl] = useState<string>(post.audioUrl || '');
+  const [refreshingAudio, setRefreshingAudio] = useState(false);
   const timeAgo = formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
 
   const isOwner =
@@ -47,6 +49,19 @@ export default function PostCard({ post, onDelete, onUpdate }: {
       alert('Failed to delete post');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleRefreshAudio = async () => {
+    setRefreshingAudio(true);
+    try {
+      const { data } = await api.post<Post>(`/posts/${post._id}/refresh-audio`);
+      setAudioUrl(data.audioUrl || '');
+    } catch (err) {
+      console.error('Failed to refresh audio URL', err);
+      alert('Could not refresh audio. Please try again.');
+    } finally {
+      setRefreshingAudio(false);
     }
   };
 
@@ -120,21 +135,32 @@ export default function PostCard({ post, onDelete, onUpdate }: {
         <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap mb-4">{post.content}</p>
       )}
 
-      {post.type === 'voice' && post.audioUrl && (
+      {post.type === 'voice' && audioUrl && (
         <div className="space-y-2 mb-4">
           <div className="rounded-xl overflow-hidden bg-secondary/50 p-2">
-            <audio controls className="w-full h-10 accent-accent" src={post.audioUrl}>
+            <audio
+              controls
+              key={audioUrl}
+              className="w-full h-10 accent-accent"
+              src={audioUrl}
+              onError={() => {}}
+            >
               Your browser does not support the audio element.
             </audio>
           </div>
-          <a
-            href={post.audioUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 px-2"
-          >
-            Trouble playing? Open audio file directly
-          </a>
+          <div className="flex items-center gap-3 px-2">
+            <button
+              onClick={handleRefreshAudio}
+              disabled={refreshingAudio}
+              className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary transition-colors"
+              title="Refresh audio if it's not playing"
+            >
+              {refreshingAudio
+                ? <Loader2 className="h-3 w-3 animate-spin" />
+                : <RefreshCw className="h-3 w-3" />}
+              {refreshingAudio ? 'Refreshing...' : 'Refresh audio'}
+            </button>
+          </div>
         </div>
       )}
 
