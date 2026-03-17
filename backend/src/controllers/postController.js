@@ -1,6 +1,6 @@
 const Post = require('../models/Post');
 const Connection = require('../models/Connection');
-const { uploadToS3, getSignedAudioUrl } = require('../services/storageService');
+const { uploadToS3, getSignedAudioUrl, uploadImageToS3 } = require('../services/storageService');
 
 const createTextPost = async (req, res, next) => {
   try {
@@ -46,6 +46,29 @@ const createVoicePost = async (req, res, next) => {
     res.status(201).json(post);
   } catch (error) {
     console.error('❌ CreateVoicePost Error:', error.message);
+    next(error);
+  }
+};
+
+const createImagePost = async (req, res, next) => {
+  try {
+    const userId = req.user.userId;
+    if (!req.file) return res.status(400).json({ message: 'No image file uploaded' });
+
+    const existingPost = await Post.findOne({ userId });
+    if (existingPost) {
+      return res.status(400).json({ message: 'You can only have one active post. Delete your current post first.' });
+    }
+
+    console.log('🖼️ Uploading image for user:', userId);
+    const imageUrl = await uploadImageToS3(req.file);
+    console.log('✅ Image upload success');
+
+    const post = await Post.create({ userId, type: 'image', imageUrl });
+    await post.populate('userId', 'name profileImage');
+    res.status(201).json(post);
+  } catch (error) {
+    console.error('❌ createImagePost error:', error.message);
     next(error);
   }
 };
@@ -149,6 +172,7 @@ const refreshAudioUrl = async (req, res, next) => {
 module.exports = {
   createTextPost,
   createVoicePost,
+  createImagePost,
   getFeed,
   deletePost,
   reactToPost,

@@ -15,9 +15,10 @@ export interface Reaction {
 export interface Post {
   _id: string;
   userId: User;
-  type: 'text' | 'voice';
+  type: 'text' | 'voice' | 'image';
   content?: string;
   audioUrl?: string;
+  imageUrl?: string;
   createdAt: string;
   reactions: Reaction[];
 }

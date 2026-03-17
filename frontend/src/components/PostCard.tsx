@@ -131,8 +131,28 @@ export default function PostCard({ post, onDelete, onUpdate }: {
       </div>
 
       {/* Content */}
-      {post.type === 'text' && (
+      {post.type === 'text' && post.content && (
         <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap mb-4">{post.content}</p>
+      )}
+
+      {post.type === 'image' && post.imageUrl && (
+        <div className="mb-4 rounded-2xl overflow-hidden border border-white/5">
+          <div className="relative w-full">
+            <Image
+              src={post.imageUrl}
+              alt="Post image"
+              width={800}
+              height={500}
+              className="w-full object-cover max-h-[480px]"
+              unoptimized
+            />
+          </div>
+          {post.content && (
+            <p className="px-4 py-2 text-sm text-foreground/80 bg-secondary/20 border-t border-white/5">
+              {post.content}
+            </p>
+          )}
+        </div>
       )}
 
       {post.type === 'voice' && audioUrl && (
