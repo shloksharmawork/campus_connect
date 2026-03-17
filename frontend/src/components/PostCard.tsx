@@ -1,4 +1,6 @@
-import { Post } from '@/types';
+'use client';
+
+import { Post, Reaction } from '@/types';
 import { Mic, FileText, Trash2, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuthStore } from '@/services/authService';
@@ -6,16 +8,36 @@ import { useState } from 'react';
 import api from '@/services/api';
 import Image from 'next/image';
 
-export default function PostCard({ post, onDelete }: { post: Post, onDelete?: (id: string) => void }) {
+const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+
+function getReactionCounts(reactions: Reaction[]) {
+  const counts: Record<string, number> = {};
+  reactions.forEach((r) => {
+    counts[r.emoji] = (counts[r.emoji] || 0) + 1;
+  });
+  return counts;
+}
+
+export default function PostCard({ post, onDelete, onUpdate }: { 
+  post: Post; 
+  onDelete?: (id: string) => void;
+  onUpdate?: (post: Post) => void;
+}) {
   const { user } = useAuthStore();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [localReactions, setLocalReactions] = useState<Reaction[]>(post.reactions || []);
   const timeAgo = formatDistanceToNow(new Date(post.createdAt), { addSuffix: true });
-  
-  const isOwner = user?._id === post.userId?._id || (typeof post.userId === 'string' && user?._id === post.userId);
+
+  const isOwner =
+    user?._id === post.userId?._id ||
+    (typeof post.userId === 'string' && user?._id === post.userId);
+
+  const myReaction = localReactions.find((r) => r.userId === user?._id);
+  const reactionCounts = getReactionCounts(localReactions);
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
-    
     setIsDeleting(true);
     try {
       await api.delete(`/posts/${post._id}`);
@@ -28,8 +50,20 @@ export default function PostCard({ post, onDelete }: { post: Post, onDelete?: (i
     }
   };
 
+  const handleReact = async (emoji: string) => {
+    setShowEmojiPicker(false);
+    try {
+      const { data } = await api.post<Post>(`/posts/${post._id}/react`, { emoji });
+      setLocalReactions(data.reactions || []);
+      if (onUpdate) onUpdate(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="glass-panel rounded-2xl p-5 hover:border-white/20 transition-all border border-white/5 relative group">
+      {/* Header */}
       <div className="flex items-start gap-3 mb-4">
         <div className="relative w-10 h-10 shrink-0">
           <Image
@@ -63,20 +97,21 @@ export default function PostCard({ post, onDelete }: { post: Post, onDelete?: (i
         )}
       </div>
 
+      {/* Content */}
       {post.type === 'text' && (
-        <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">{post.content}</p>
+        <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap mb-4">{post.content}</p>
       )}
 
       {post.type === 'voice' && post.audioUrl && (
-        <div className="space-y-2">
+        <div className="space-y-2 mb-4">
           <div className="rounded-xl overflow-hidden bg-secondary/50 p-2">
             <audio controls className="w-full h-10 accent-accent" src={post.audioUrl}>
               Your browser does not support the audio element.
             </audio>
           </div>
-          <a 
-            href={post.audioUrl} 
-            target="_blank" 
+          <a
+            href={post.audioUrl}
+            target="_blank"
             rel="noopener noreferrer"
             className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 px-2"
           >
@@ -84,6 +119,51 @@ export default function PostCard({ post, onDelete }: { post: Post, onDelete?: (i
           </a>
         </div>
       )}
+
+      {/* Reactions Bar */}
+      <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-white/5">
+        {/* Existing reactions */}
+        {Object.entries(reactionCounts).map(([emoji, count]) => (
+          <button
+            key={emoji}
+            onClick={() => handleReact(emoji)}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all hover:scale-105 ${
+              myReaction?.emoji === emoji
+                ? 'bg-primary/20 border-primary/40 text-primary'
+                : 'bg-secondary/60 border-white/5 text-foreground/70 hover:border-white/20'
+            }`}
+          >
+            <span>{emoji}</span>
+            <span>{count}</span>
+          </button>
+        ))}
+
+        {/* Add reaction button */}
+        <div className="relative">
+          <button
+            onClick={() => setShowEmojiPicker((p) => !p)}
+            title="Add reaction"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border border-white/5 bg-secondary/40 hover:bg-secondary/80 transition-all text-muted-foreground hover:text-foreground"
+          >
+            {myReaction ? myReaction.emoji : '＋'} React
+          </button>
+
+          {showEmojiPicker && (
+            <div className="absolute bottom-9 left-0 z-20 flex gap-1 bg-secondary/95 backdrop-blur-md border border-white/10 rounded-2xl p-2 shadow-xl">
+              {EMOJIS.map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => handleReact(emoji)}
+                  className="text-xl hover:scale-125 transition-transform p-1"
+                  title={emoji}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

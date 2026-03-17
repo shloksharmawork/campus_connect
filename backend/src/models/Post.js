@@ -14,12 +14,16 @@ const postSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      // Optional, as voice notes might only have audioUrl
     },
     audioUrl: {
       type: String,
-      // Optional, as text posts might not have an audioUrl
     },
+    reactions: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        emoji: { type: String, required: true }, // e.g. '👍', '❤️', '😂'
+      }
+    ],
   },
   { timestamps: true }
 );

@@ -11,18 +11,12 @@ const createTextPost = async (req, res, next) => {
         return res.status(400).json({ message: "Content is required." });
     }
 
-    // Check if user already has a post
     const existingPost = await Post.findOne({ userId });
     if (existingPost) {
       return res.status(400).json({ message: "You can only have one active post. Please delete your current post to create a new one." });
     }
 
-    const post = await Post.create({
-      userId,
-      type: 'text',
-      content,
-    });
-
+    const post = await Post.create({ userId, type: 'text', content });
     await post.populate('userId', 'name profileImage');
     res.status(201).json(post);
   } catch (error) {
@@ -38,23 +32,16 @@ const createVoicePost = async (req, res, next) => {
       return res.status(400).json({ message: 'No audio file uploaded' });
     }
 
-    // Check if user already has a post
     const existingPost = await Post.findOne({ userId });
     if (existingPost) {
       return res.status(400).json({ message: "You can only have one active post. Please delete your current post to create a new one." });
     }
 
     console.log('🎙️ Attempting voice upload for user:', userId);
-    // Upload buffer to S3
     const audioUrl = await uploadToS3(req.file);
     console.log('✅ Voice upload success:', audioUrl);
 
-    const post = await Post.create({
-      userId,
-      type: 'voice',
-      audioUrl,
-    });
-
+    const post = await Post.create({ userId, type: 'voice', audioUrl });
     await post.populate('userId', 'name profileImage');
     res.status(201).json(post);
   } catch (error) {
@@ -65,10 +52,6 @@ const createVoicePost = async (req, res, next) => {
 
 const getFeed = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
-
-    // For Campus Connect, we'll show all posts in the feed so everyone can see each other
-    // and strangers can discover and connect.
     const posts = await Post.find()
       .populate('userId', 'name profileImage')
       .sort({ createdAt: -1 })
@@ -91,7 +74,6 @@ const deletePost = async (req, res, next) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Ensure user owns the post
     if (post.userId.toString() !== userId) {
       return res.status(403).json({ message: 'Not authorized to delete this post' });
     }
@@ -103,9 +85,49 @@ const deletePost = async (req, res, next) => {
   }
 };
 
+// Toggle reaction on a post
+const reactToPost = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { emoji } = req.body;
+    const userId = req.user.userId;
+
+    if (!emoji) return res.status(400).json({ message: 'Emoji is required' });
+
+    const post = await Post.findById(id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const existingReaction = post.reactions.find(
+      (r) => r.userId.toString() === userId
+    );
+
+    if (existingReaction) {
+      if (existingReaction.emoji === emoji) {
+        // Same emoji – remove reaction (toggle off)
+        post.reactions = post.reactions.filter(
+          (r) => r.userId.toString() !== userId
+        );
+      } else {
+        // Different emoji – update reaction
+        existingReaction.emoji = emoji;
+      }
+    } else {
+      // New reaction
+      post.reactions.push({ userId, emoji });
+    }
+
+    await post.save();
+    await post.populate('userId', 'name profileImage');
+    res.status(200).json(post);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createTextPost,
   createVoicePost,
   getFeed,
   deletePost,
+  reactToPost,
 };

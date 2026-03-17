@@ -7,6 +7,11 @@ export interface User {
   onlineStatus?: boolean;
 }
 
+export interface Reaction {
+  userId: string;
+  emoji: string;
+}
+
 export interface Post {
   _id: string;
   userId: User;
@@ -14,6 +19,7 @@ export interface Post {
   content?: string;
   audioUrl?: string;
   createdAt: string;
+  reactions: Reaction[];
 }
 
 export interface Connection {

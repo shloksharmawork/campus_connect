@@ -70,6 +70,10 @@ export default function Feed() {
     setPosts(posts.filter(p => p._id !== id));
   };
 
+  const handleUpdatePost = (updated: Post) => {
+    setPosts(posts.map(p => p._id === updated._id ? updated : p));
+  };
+
   return (
     <div className="flex-1 overflow-y-auto px-4 pb-8 max-w-2xl mx-auto w-full">
       {/* Composer */}
@@ -124,7 +128,7 @@ export default function Feed() {
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post._id} post={post} onDelete={handleDeletePost} />
+            <PostCard key={post._id} post={post} onDelete={handleDeletePost} onUpdate={handleUpdatePost} />
           ))}
         </div>
       )}

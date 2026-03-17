@@ -7,7 +7,7 @@ import Image from 'next/image';
 
 import { User } from '@/types';
 
-export default function ConnectionRequests() {
+export default function ConnectionRequests({ onAccepted }: { onAccepted?: () => void }) {
   const [requests, setRequests] = useState<{ _id: string; requesterId: User }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,6 +30,7 @@ export default function ConnectionRequests() {
     try {
       await api.post(`/connections/respond/${connectionId}`, { action });
       setRequests((prev) => prev.filter((r) => r._id !== connectionId));
+      if (action === 'accept' && onAccepted) onAccepted();
     } catch (err) {
       console.error(err);
     }

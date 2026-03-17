@@ -1,14 +1,13 @@
 const express = require('express');
 const multer = require('multer');
-const { createTextPost, createVoicePost, getFeed, deletePost } = require('../controllers/postController');
+const { createTextPost, createVoicePost, getFeed, deletePost, reactToPost } = require('../controllers/postController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
-// Configure multer for memory storage (buffer)
 const upload = multer({
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB limit for voice notes
+    fileSize: 10 * 1024 * 1024,
   },
 });
 
@@ -18,5 +17,6 @@ router.post('/text', createTextPost);
 router.post('/voice', upload.single('audio'), createVoicePost);
 router.delete('/:id', deletePost);
 router.get('/feed', getFeed);
+router.post('/:id/react', reactToPost);
 
 module.exports = router;
