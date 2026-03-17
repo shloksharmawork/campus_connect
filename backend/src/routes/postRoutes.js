@@ -6,17 +6,15 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 const upload = multer({
-  limits: {
-    fileSize: 10 * 1024 * 1024,
-  },
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 
 router.use(authMiddleware);
 
+router.get('/feed', getFeed);
 router.post('/text', createTextPost);
 router.post('/voice', upload.single('audio'), createVoicePost);
+router.post('/:id/react', reactToPost);   // Must be before /:id delete
 router.delete('/:id', deletePost);
-router.get('/feed', getFeed);
-router.post('/:id/react', reactToPost);
 
 module.exports = router;

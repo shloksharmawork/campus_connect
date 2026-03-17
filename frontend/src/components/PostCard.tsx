@@ -52,12 +52,30 @@ export default function PostCard({ post, onDelete, onUpdate }: {
 
   const handleReact = async (emoji: string) => {
     setShowEmojiPicker(false);
+    if (!user) return;
+
+    // Optimistic update
+    const prev = [...localReactions];
+    const existing = localReactions.find((r) => r.userId === user._id);
+    let next: Reaction[];
+    if (existing) {
+      if (existing.emoji === emoji) {
+        next = localReactions.filter((r) => r.userId !== user._id);
+      } else {
+        next = localReactions.map((r) => r.userId === user._id ? { ...r, emoji } : r);
+      }
+    } else {
+      next = [...localReactions, { userId: user._id, emoji }];
+    }
+    setLocalReactions(next);
+
     try {
       const { data } = await api.post<Post>(`/posts/${post._id}/react`, { emoji });
       setLocalReactions(data.reactions || []);
       if (onUpdate) onUpdate(data);
     } catch (err) {
       console.error(err);
+      setLocalReactions(prev); // rollback
     }
   };
 
